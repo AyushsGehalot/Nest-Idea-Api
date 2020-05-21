@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, Entity, Column, CreateDateColumn, BeforeInsert, ManyToOne, OneToMany } from "typeorm";
+import { PrimaryGeneratedColumn, Entity, Column, CreateDateColumn, BeforeInsert, ManyToOne, OneToMany, ManyToMany, JoinTable } from "typeorm";
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { IdeaEntity } from "src/idea/idea.entity";
@@ -23,6 +23,10 @@ export class UserEntity{
     @OneToMany(type => IdeaEntity, idea => idea.author)
     ideas: IdeaEntity[];
 
+    @ManyToMany(type => IdeaEntity, {cascade: true})
+    @JoinTable()
+    bookmarks: IdeaEntity[];
+
     @BeforeInsert()
     async hashPass(){
         this.password = await bcrypt.hash(this.password, 10);
@@ -36,6 +40,9 @@ export class UserEntity{
         }    
         if(this.ideas){
             responseObject.idea = this.ideas;
+        }
+        if(this.bookmarks){
+            responseObject.bookmarks = this.bookmarks;
         }
         return responseObject;    
     }
